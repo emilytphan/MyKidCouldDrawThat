@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose a category</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page">
+  <main class="card center">
+    <h1>What do you want to draw?</h1>
+
+    <div class="options" id="categories">
+      <label class="option"><input type="radio" name="category" value="animals" checked><span>Animals</span></label>
+      <label class="option"><input type="radio" name="category" value="shapes"><span>Shapes</span></label>
+      <label class="option"><input type="radio" name="category" value="random"><span>Random</span></label>
+    </div>
+
+    <div class="setting">
+      <label for="time">Time per round: <strong id="timeOut">60s</strong></label>
+      <input type="range" id="time" min="15" max="180" step="15" value="60">
+    </div>
+
+    <div class="setting">
+      <label>Rounds</label>
+      <div class="stepper">
+        <button id="minus" type="button">−</button>
+        <strong id="roundsOut">3</strong>
+        <button id="plus" type="button">+</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <a class="btn" href="index.html">Back</a>
+      <button class="btn primary" id="startBtn" type="button">Start drawing</button>
+    </div>
+  </main>
+
+  <script type="module" src="js/categories.js"></script>
+</body>
+</html>
