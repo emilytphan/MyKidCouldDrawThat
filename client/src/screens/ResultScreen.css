@@ -1,0 +1,84 @@
+.result-screen {
+  box-sizing: border-box;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.result-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.result-word {
+  margin: 0;
+  color: var(--text);
+}
+
+.result-banner {
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+  margin: 0;
+}
+
+.result-banner-correct {
+  color: var(--text-h);
+}
+
+.result-banner-wrong {
+  color: var(--text-h);
+}
+
+.result-guesses {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px 18px;
+  background: var(--social-bg);
+  text-align: left;
+}
+
+.result-guesses-heading {
+  font-size: 20px;
+  margin: 0 0 8px;
+  color: var(--text-h);
+}
+
+.result-guesses-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text);
+}
+
+.result-guesses-list li + li {
+  margin-top: 6px;
+}
+
+.result-next {
+  font: inherit;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+}
+
+.result-next:hover {
+  box-shadow: var(--shadow);
+}
+
+.result-next:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
