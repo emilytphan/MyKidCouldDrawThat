@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import './DrawScreen.css'
+import HandDemo from '../HandDemo'
 
-export default function DrawScreen({ word, round, totalRounds, onFinish, children }) {
+export default function DrawScreen({ word, round, totalRounds, onFinish }) {
   const [secondsLeft, setSecondsLeft] = useState(60)
   const finishedRef = useRef(false)
+  const drawingRef = useRef(null)
 
   function finish() {
     if (finishedRef.current) return
     finishedRef.current = true
-    onFinish('fake-image')
+    const image = drawingRef.current
+      ? drawingRef.current.getImage()
+      : 'fake-image'
+    onFinish(image)
   }
 
   useEffect(() => {
@@ -41,7 +46,7 @@ export default function DrawScreen({ word, round, totalRounds, onFinish, childre
         {secondsLeft}s
       </p>
       <div className="draw-canvas-placeholder">
-        {children ?? 'Canvas goes here'}
+        <HandDemo ref={drawingRef} />
       </div>
       <button type="button" className="draw-done" onClick={finish}>
         Done
