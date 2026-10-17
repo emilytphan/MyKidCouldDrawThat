@@ -42,6 +42,7 @@
   color: var(--text);
   display: grid;
   place-items: center;
+  overflow: auto;
 }
 
 .draw-done {

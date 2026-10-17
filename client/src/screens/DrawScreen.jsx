@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './DrawScreen.css'
 
-export default function DrawScreen({ word, round, totalRounds, onFinish }) {
+export default function DrawScreen({ word, round, totalRounds, onFinish, children }) {
   const [secondsLeft, setSecondsLeft] = useState(60)
   const finishedRef = useRef(false)
 
@@ -40,7 +40,9 @@ export default function DrawScreen({ word, round, totalRounds, onFinish }) {
       <p className="draw-timer" aria-live="polite">
         {secondsLeft}s
       </p>
-      <div className="draw-canvas-placeholder">Canvas goes here</div>
+      <div className="draw-canvas-placeholder">
+        {children ?? 'Canvas goes here'}
+      </div>
       <button type="button" className="draw-done" onClick={finish}>
         Done
       </button>
