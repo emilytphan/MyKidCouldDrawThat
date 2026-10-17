@@ -1,3 +1,10 @@
+# Client
+
+The primary client is the React app in `src/`, bootstrapped by `index.html` and `src/main.jsx`.
+
+Run it from the repository root with `npm --prefix client run dev`. Use `npm --prefix client run build` to create a production build and `npm --prefix client run lint` to run ESLint.
+
+The separate `prototype/` directory holds the earlier static HTML implementation and its assets. It is retained for reference and is not the primary app.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
