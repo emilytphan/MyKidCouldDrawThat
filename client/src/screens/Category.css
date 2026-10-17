@@ -1,0 +1,38 @@
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.category-button {
+  font: inherit;
+  font-weight: 600;
+  padding: 28px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border: 2px solid var(--accent-border);
+}
+
+.category-button:hover {
+  box-shadow: var(--shadow);
+}
+
+.category-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.category-button-mix {
+  grid-column: 1 / -1;
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+@media (max-width: 520px) {
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+}
