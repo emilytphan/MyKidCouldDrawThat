@@ -10,7 +10,9 @@ const GESTURE_MAP = {
 const SMOOTHING_FRAMES = 4;   // average the last 4 cursor positions
 const DEBOUNCE_FRAMES = 5;    // a new gesture must hold 5 frames
 const PINCH_ON = 0.3;
-
+const X_MIN = 0.02, X_MAX = 0.98;
+const Y_MIN = 0.02, Y_MAX = 0.9;
+const remap = (v, lo, hi) => Math.min(Math.max((v - lo) / (hi - lo), 0), 1);
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
 export function useHandTracking(videoRef) {
@@ -63,8 +65,8 @@ export function useHandTracking(videoRef) {
           const tip = lm[8];
 
           // cursor: mirror x so it matches the mirrored video, then smooth
-          recent.push({ x: 1 - tip.x, y: tip.y });
-          if (recent.length > SMOOTHING_FRAMES) recent.shift();
+        recent.push({ x: 1 - tip.x, y: tip.y });       
+        if (recent.length > SMOOTHING_FRAMES) recent.shift();
 
           // pinch distance, divided by hand size so it works near or far
           const handSize = dist(lm[0], lm[9]);
