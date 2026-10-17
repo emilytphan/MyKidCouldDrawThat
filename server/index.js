@@ -1,11 +1,12 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const sharp = require("sharp");
 const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "20mb" }));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -16,13 +17,21 @@ app.post("/api/guess", async (req, res) => {
   const { imageBase64, targetWord } = req.body;
   if (!imageBase64) return res.status(400).json({ error: "No image" });
 
-  const data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-
   try {
+    // Strip a "data:image/...;base64," prefix if present
+    const raw = imageBase64.replace(/^data:image\/[\w+.-]+;base64,/, "");
+
+    // Convert any image format to a PNG on a white background
+    const png = await sharp(Buffer.from(raw, "base64"))
+      .flatten({ background: "#ffffff" })
+      .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
+      .png()
+      .toBuffer();
+
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: [
-        { inlineData: { mimeType: "image/png", data } },
+        { inlineData: { mimeType: "image/png", data: png.toString("base64") } },
         {
           text:
             "This is a hand-drawn sketch from a drawing game. What is it? " +
