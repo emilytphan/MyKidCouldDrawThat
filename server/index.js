@@ -2,13 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { GoogleGenAI } = require("@google/genai");
-const connectDb = require("./db");
-connectDb();
+const connectDB = require("./db");
+connectDB();
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
-app.use(require("./routes/game"));
+app.use("/api", require("./routes/game"));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
