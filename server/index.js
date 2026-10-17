@@ -56,7 +56,11 @@ app.post("/api/guess", async (req, res) => {
     res.json({ guesses, comment: parsed.comment, correct });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Guess failed", guesses: [], correct: false });
+    res.status(500).json({
+      error: err.message || "Guess failed",
+      guesses: [],
+      correct: false,
+    });
   }
 });
 
