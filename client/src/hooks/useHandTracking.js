@@ -17,6 +17,7 @@ export function useHandTracking(videoRef) {
     gesture: "none",
     cursor: { x: 0.5, y: 0.5 },
     pinchDistance: 1,
+    handVisible: false,
   });
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export function useHandTracking(videoRef) {
         const result = recognizer.recognizeForVideo(video, performance.now());
         let raw = "none";
         let pinch = 1;
+        const handVisible = result.landmarks.length > 0;
 
         if (result.landmarks.length > 0) {
           const lm = result.landmarks[0];
@@ -98,15 +100,14 @@ export function useHandTracking(videoRef) {
           candidate = raw;
           count = 1;
         }
-
         if (recent.length > 0) {
-          const avg = recent.reduce(
+        const avg = recent.reduce(
             (s, p) => ({ x: s.x + p.x / recent.length, y: s.y + p.y / recent.length }),
             { x: 0, y: 0 }
-          );
-          setState({ gesture: stable, cursor: avg, pinchDistance: pinch });
+        );
+        setState({ gesture: stable, cursor: avg, pinchDistance: pinch, handVisible });
         } else {
-          setState((s) => ({ ...s, gesture: stable }));
+        setState((s) => ({ ...s, gesture: "none", handVisible: false }));
         }
 
         animationId = requestAnimationFrame(loop);
