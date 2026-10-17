@@ -3,10 +3,13 @@ const express = require("express");
 const cors = require("cors");
 const sharp = require("sharp");
 const { GoogleGenAI } = require("@google/genai");
+const connectDB = require("./db");
+connectDB();
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
+app.use("/api", require("./routes/game"));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 

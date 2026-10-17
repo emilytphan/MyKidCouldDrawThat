@@ -5,13 +5,36 @@ import Category from './screens/Category.jsx'
 import DrawScreen from './screens/DrawScreen.jsx'
 import ResultScreen from './screens/ResultScreen.jsx'
 import FinalScreen from './screens/FinalScreen.jsx'
-import HandTest from './HandTest'
 import './screens/Start.css'
 
 const TOTAL_ROUNDS = 5
-const USE_MOCK_AI = true
+const USE_MOCK_AI = false
 
-async function getGuess(_imageBase64, _targetWord) {
+async function fetchRoundWords(category, count) {
+  const picked = []
+
+  for (let i = 0; i < count; i += 1) {
+    const params = new URLSearchParams()
+    if (category && category !== 'random') {
+      params.set('category', category)
+    }
+    if (picked.length > 0) {
+      params.set('exclude', picked.map((word) => word.text).join(','))
+    }
+
+    const query = params.toString()
+    const res = await fetch(query ? `/api/word?${query}` : '/api/word')
+    if (!res.ok) {
+      throw new Error('Failed to load words')
+    }
+    const word = await res.json()
+    picked.push({ text: word.text, category: word.category })
+  }
+
+  return picked
+}
+
+async function getGuess(imageBase64, targetWord) {
   if (USE_MOCK_AI) {
     await new Promise((resolve) => setTimeout(resolve, 1000))
     return {
@@ -20,7 +43,17 @@ async function getGuess(_imageBase64, _targetWord) {
     }
   }
 
-  return { guesses: [], correct: false }
+  const res = await fetch('/api/guess', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageBase64, targetWord }),
+  })
+  const data = await res.json()
+  return {
+    guesses: data.guesses || [],
+    correct: Boolean(data.correct),
+    comment: data.comment,
+  }
 }
 
 function App() {
@@ -42,13 +75,32 @@ function App() {
     setResult(null)
   }
 
+  async function handleSelectCategory(nextCategory) {
+    setScreen('loading')
+    try {
+      const words = await fetchRoundWords(nextCategory, TOTAL_ROUNDS)
+      setRoundWords(words)
+    } catch {
+      setRoundWords(pickWords(nextCategory, TOTAL_ROUNDS))
+    }
+    setCategory(nextCategory)
+    setRound(1)
+    setScore(0)
+    setResult(null)
+    setScreen('draw')
+  }
+
   async function handleFinish(imageBase64) {
     setScreen('thinking')
-    const nextResult = await getGuess(imageBase64, currentWord)
-    if (nextResult.correct) {
-      setScore((current) => current + 1)
+    try {
+      const nextResult = await getGuess(imageBase64, currentWord)
+      if (nextResult.correct) {
+        setScore((current) => current + 1)
+      }
+      setResult(nextResult)
+    } catch {
+      setResult({ guesses: [], correct: false })
     }
-    setResult(nextResult)
     setScreen('result')
   }
 
@@ -71,15 +123,16 @@ function App() {
     return (
       <Category
         onBack={() => setScreen('start')}
-        onSelect={(nextCategory) => {
-          setCategory(nextCategory)
-          setRoundWords(pickWords(nextCategory, TOTAL_ROUNDS))
-          setRound(1)
-          setScore(0)
-          setResult(null)
-          setScreen('draw')
-        }}
+        onSelect={handleSelectCategory}
       />
+    )
+  }
+
+  if (screen === 'loading') {
+    return (
+      <main className="start-page">
+        <h1>Loading words...</h1>
+      </main>
     )
   }
 
@@ -118,8 +171,7 @@ function App() {
       round={round}
       totalRounds={TOTAL_ROUNDS}
       onFinish={handleFinish}
-    >
-    </DrawScreen>
+    />
   )
 }
 

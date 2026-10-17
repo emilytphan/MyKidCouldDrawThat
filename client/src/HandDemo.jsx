@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useHandTracking } from "./hooks/useHandTracking";
 
 const COLORS = ["#e63946", "#000000", "#2a9d8f", "#3a86ff", "#ffbe0b"];
 
-export default function HandDemo() {
+const HandDemo = forwardRef(function HandDemo(_props, ref) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const lastPoint = useRef(null);
@@ -52,6 +52,23 @@ export default function HandDemo() {
     const canvas = canvasRef.current;
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
   }
+
+  useImperativeHandle(ref, () => ({
+    getImage() {
+      const canvas = canvasRef.current;
+      const exportCanvas = document.createElement("canvas");
+      exportCanvas.width = canvas.width;
+      exportCanvas.height = canvas.height;
+      const ctx = exportCanvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+      ctx.drawImage(canvas, 0, 0);
+      return exportCanvas.toDataURL("image/png");
+    },
+    clear() {
+      clearCanvas();
+    },
+  }));
 
   return (
     <div>
@@ -118,4 +135,6 @@ export default function HandDemo() {
       </div>
     </div>
   );
-}
+});
+
+export default HandDemo;
