@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { pickWords } from './data/words.js'
 import Start from './screens/Start.jsx'
 import Category from './screens/Category.jsx'
+import HandTest from './HandTest'
 import './screens/Start.css'
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
           </li>
         ))}
       </ol>
+      <HandTest />
       <button type="button" className="start-play" onClick={() => setScreen('category')}>
         Back to categories
       </button>
