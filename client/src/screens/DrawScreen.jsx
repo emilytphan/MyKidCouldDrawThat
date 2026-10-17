@@ -10,9 +10,7 @@ export default function DrawScreen({ word, round, totalRounds, onFinish }) {
   function finish() {
     if (finishedRef.current) return
     finishedRef.current = true
-    const image = drawingRef.current
-      ? drawingRef.current.getImage()
-      : 'fake-image'
+    const image = drawingRef.current?.getImage?.() || ''
     onFinish(image)
   }
 

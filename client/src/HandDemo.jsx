@@ -7,6 +7,7 @@ const HandDemo = forwardRef(function HandDemo(_props, ref) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const lastPoint = useRef(null);
+  const mouseDrawing = useRef(false);
   const [color, setColor] = useState(COLORS[0]);
   const [brushSize, setBrushSize] = useState(6);
 
@@ -48,6 +49,50 @@ const HandDemo = forwardRef(function HandDemo(_props, ref) {
     }
   }, [cursor, gesture, handVisible, color, brushSize]);
 
+  function pointFromEvent(event) {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+      y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+    };
+  }
+
+  function strokeTo(x, y) {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.strokeStyle = color;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    if (lastPoint.current) {
+      ctx.beginPath();
+      ctx.moveTo(lastPoint.current.x, lastPoint.current.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    lastPoint.current = { x, y };
+  }
+
+  function handlePointerDown(event) {
+    mouseDrawing.current = true;
+    canvasRef.current.setPointerCapture(event.pointerId);
+    const { x, y } = pointFromEvent(event);
+    lastPoint.current = { x, y };
+    strokeTo(x, y);
+  }
+
+  function handlePointerMove(event) {
+    if (!mouseDrawing.current) return;
+    const { x, y } = pointFromEvent(event);
+    strokeTo(x, y);
+  }
+
+  function handlePointerUp() {
+    mouseDrawing.current = false;
+    lastPoint.current = null;
+  }
+
   function clearCanvas() {
     const canvas = canvasRef.current;
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
@@ -56,6 +101,7 @@ const HandDemo = forwardRef(function HandDemo(_props, ref) {
   useImperativeHandle(ref, () => ({
     getImage() {
       const canvas = canvasRef.current;
+      if (!canvas) return "";
       const exportCanvas = document.createElement("canvas");
       exportCanvas.width = canvas.width;
       exportCanvas.height = canvas.height;
@@ -93,7 +139,19 @@ const HandDemo = forwardRef(function HandDemo(_props, ref) {
           ref={canvasRef}
           width={640}
           height={480}
-          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            cursor: "crosshair",
+            touchAction: "none",
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         />
         {handVisible && (
           <div
@@ -114,7 +172,9 @@ const HandDemo = forwardRef(function HandDemo(_props, ref) {
         )}
       </div>
 
-      {!handVisible && <p>Show your hand to the camera</p>}
+      {!handVisible && (
+        <p>No camera needed: hold click and drag to draw, or show a hand if you have a webcam.</p>
+      )}
       <p>gesture: {gesture}</p>
 
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

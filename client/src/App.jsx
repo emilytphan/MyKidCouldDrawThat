@@ -43,12 +43,37 @@ async function getGuess(imageBase64, targetWord) {
     }
   }
 
-  const res = await fetch('/api/guess', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageBase64, targetWord }),
-  })
-  const data = await res.json()
+  if (!imageBase64) {
+    return {
+      guesses: [],
+      correct: false,
+      error: 'No drawing was captured. Draw with the mouse, then click Done.',
+    }
+  }
+
+  let data
+  try {
+    const res = await fetch('/api/guess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64, targetWord }),
+    })
+    data = await res.json()
+    if (!res.ok) {
+      return {
+        guesses: data.guesses || [],
+        correct: false,
+        error: data.error || 'Guess failed',
+      }
+    }
+  } catch {
+    return {
+      guesses: [],
+      correct: false,
+      error: 'Could not reach /api/guess. Use the Local URL from npm run dev and keep node index.js running.',
+    }
+  }
+
   return {
     guesses: data.guesses || [],
     correct: Boolean(data.correct),
