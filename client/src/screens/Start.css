@@ -1,0 +1,95 @@
+.start-page {
+  box-sizing: border-box;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.start-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.start-page h1 {
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.start-lead,
+.start-howto,
+.start-demo {
+  color: var(--text);
+}
+
+.start-howto,
+.start-demo {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px 18px;
+  background: var(--social-bg);
+}
+
+.start-howto ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.start-howto li + li {
+  margin-top: 6px;
+}
+
+.start-demo-canvas {
+  display: block;
+  width: 100%;
+  height: 220px;
+  margin: 12px 0;
+  border-radius: 10px;
+  border: 2px dashed var(--accent-border);
+  background: #fff;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.start-play,
+.start-secondary {
+  font: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.start-secondary {
+  align-self: flex-start;
+  padding: 8px 12px;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.start-play {
+  margin-top: 8px;
+  padding: 14px 20px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+}
+
+.start-play:hover,
+.start-secondary:hover {
+  box-shadow: var(--shadow);
+}
+
+.start-play:focus-visible,
+.start-secondary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
