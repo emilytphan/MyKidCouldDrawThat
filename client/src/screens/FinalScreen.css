@@ -1,0 +1,58 @@
+.final-screen {
+  box-sizing: border-box;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.final-kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.final-score {
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -0.8px;
+  margin: 0;
+  color: var(--text-h);
+}
+
+.final-leaderboard {
+  min-height: 180px;
+  border-radius: 12px;
+  border: 2px dashed var(--accent-border);
+  background: var(--social-bg);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+}
+
+.final-play-again {
+  font: inherit;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+}
+
+.final-play-again:hover {
+  box-shadow: var(--shadow);
+}
+
+.final-play-again:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
