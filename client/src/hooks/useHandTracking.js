@@ -5,6 +5,7 @@ const GESTURE_MAP = {
   Pointing_Up: "draw",
   Closed_Fist: "erase",
   Open_Palm: "palette",
+  Victory: "idle",
 };
 const SMOOTHING_FRAMES = 4;   // average the last 4 cursor positions
 const DEBOUNCE_FRAMES = 5;    // a new gesture must hold 5 frames
@@ -92,7 +93,8 @@ export function useHandTracking(videoRef) {
           count = 0;
         } else if (raw === candidate) {
           count++;
-          if (count >= DEBOUNCE_FRAMES) {
+        const needed = stable === "draw" ? 1 : DEBOUNCE_FRAMES;
+        if (count >= needed) {
             stable = raw;
             count = 0;
           }
