@@ -5,6 +5,7 @@ const GESTURE_MAP = {
   Pointing_Up: "draw",
   Closed_Fist: "erase",
   Open_Palm: "palette",
+  Victory: "idle",
 };
 const SMOOTHING_FRAMES = 4;   // average the last 4 cursor positions
 const DEBOUNCE_FRAMES = 5;    // a new gesture must hold 5 frames
@@ -17,6 +18,7 @@ export function useHandTracking(videoRef) {
     gesture: "none",
     cursor: { x: 0.5, y: 0.5 },
     pinchDistance: 1,
+    handVisible: false,
   });
 
   useEffect(() => {
@@ -54,6 +56,7 @@ export function useHandTracking(videoRef) {
         const result = recognizer.recognizeForVideo(video, performance.now());
         let raw = "none";
         let pinch = 1;
+        const handVisible = result.landmarks.length > 0;
 
         if (result.landmarks.length > 0) {
           const lm = result.landmarks[0];
@@ -90,7 +93,8 @@ export function useHandTracking(videoRef) {
           count = 0;
         } else if (raw === candidate) {
           count++;
-          if (count >= DEBOUNCE_FRAMES) {
+        const needed = stable === "draw" ? 1 : DEBOUNCE_FRAMES;
+        if (count >= needed) {
             stable = raw;
             count = 0;
           }
@@ -98,15 +102,14 @@ export function useHandTracking(videoRef) {
           candidate = raw;
           count = 1;
         }
-
         if (recent.length > 0) {
-          const avg = recent.reduce(
+        const avg = recent.reduce(
             (s, p) => ({ x: s.x + p.x / recent.length, y: s.y + p.y / recent.length }),
             { x: 0, y: 0 }
-          );
-          setState({ gesture: stable, cursor: avg, pinchDistance: pinch });
+        );
+        setState({ gesture: stable, cursor: avg, pinchDistance: pinch, handVisible });
         } else {
-          setState((s) => ({ ...s, gesture: stable }));
+        setState((s) => ({ ...s, gesture: "none", handVisible: false }));
         }
 
         animationId = requestAnimationFrame(loop);

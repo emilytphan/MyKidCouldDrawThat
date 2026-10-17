@@ -1,62 +1,7 @@
-import { useEffect, useRef } from 'react'
 import './Start.css'
+import HandDemo from '../HandDemo'
 
 export default function Start({ onPlay }) {
-  const canvasRef = useRef(null)
-  const drawingRef = useRef(false)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width
-    canvas.height = rect.height
-  }, [])
-
-  function pointFromEvent(event) {
-    const canvas = canvasRef.current
-    const rect = canvas.getBoundingClientRect()
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    }
-  }
-
-  function handlePointerDown(event) {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    const { x, y } = pointFromEvent(event)
-
-    drawingRef.current = true
-    canvas.setPointerCapture(event.pointerId)
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctx.lineWidth = 5
-    ctx.strokeStyle = '#08060d'
-    ctx.beginPath()
-    ctx.moveTo(x, y)
-  }
-
-  function handlePointerMove(event) {
-    if (!drawingRef.current) return
-
-    const ctx = canvasRef.current.getContext('2d')
-    const { x, y } = pointFromEvent(event)
-    ctx.lineTo(x, y)
-    ctx.stroke()
-  }
-
-  function handlePointerUp() {
-    drawingRef.current = false
-  }
-
-  function clearDemo() {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-  }
-
   return (
     <main className="start-page">
       <p className="start-kicker">A drawing guessing game</p>
@@ -76,23 +21,12 @@ export default function Start({ onPlay }) {
       </section>
 
       <section className="start-demo" aria-labelledby="demo-heading">
-        <h2 id="demo-heading">Try a mouse demo</h2>
+        <h2 id="demo-heading">Try it with your hand</h2>
         <p>
-          Hold the mouse button and drag to draw. Later, Role 1&apos;s hand
-          tracking will replace this mouse stand-in.
+          Point to draw, make a fist to erase, pinch and spread to change the
+          brush size.
         </p>
-        <canvas
-          ref={canvasRef}
-          className="start-demo-canvas"
-          aria-label="Mouse drawing demo"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        />
-        <button type="button" className="start-secondary" onClick={clearDemo}>
-          Clear demo
-        </button>
+        <HandDemo />
       </section>
 
       <button type="button" className="start-play" onClick={onPlay}>
