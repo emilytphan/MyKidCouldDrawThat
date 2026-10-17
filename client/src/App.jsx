@@ -119,7 +119,6 @@ function App() {
       totalRounds={TOTAL_ROUNDS}
       onFinish={handleFinish}
     >
-      <HandTest />
     </DrawScreen>
   )
 }
