@@ -1,13 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
-const client = new Anthropic();
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const normalize = (s) =>
   s.toLowerCase().trim().replace(/[^a-z\s]/g, "").replace(/s$/, "");
@@ -19,31 +19,22 @@ app.post("/api/guess", async (req, res) => {
   const data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
   try {
-    const response = await client.messages.create(
-      {
-        model: "claude-haiku-5-5",
-        max_tokens: 300,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: "image/png", data } },
-              {
-                type: "text",
-                text:
-                  "This is a hand-drawn sketch from a drawing game. What is it? " +
-                  "Reply with JSON only, no other text: " +
-                  '{"guesses": ["...", "...", "..."], "comment": "one short funny remark"}. ' +
-                  "Guesses are single common nouns, ranked by confidence.",
-              },
-            ],
-          },
-        ],
-      },
-      { timeout: 15000 }
-    );
+    const response = await ai.models.generateContent({
+      model: "gemini-3.5-flash",
+      contents: [
+        { inlineData: { mimeType: "image/png", data } },
+        {
+          text:
+            "This is a hand-drawn sketch from a drawing game. What is it? " +
+            "Reply with JSON only, no other text: " +
+            '{"guesses": ["...", "...", "..."], "comment": "one short funny remark"}. ' +
+            "Guesses are single common nouns, ranked by confidence.",
+        },
+      ],
+      config: { responseMimeType: "application/json" },
+    });
 
-    const text = response.content.find((b) => b.type === "text")?.text || "";
+    const text = response.text || "";
     const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
     const guesses = parsed.guesses || [];
     const correct = targetWord
