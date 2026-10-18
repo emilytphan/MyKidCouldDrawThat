@@ -1,7 +1,7 @@
 import './Start.css'
 import HandDemo from '../HandDemo'
 
-export default function Start({ onPlay }) {
+export default function Start({ onPlay, onMultiplayer }) {
   return (
     <main className="start-page">
       <p className="start-kicker">A drawing guessing game</p>
@@ -13,11 +13,22 @@ export default function Start({ onPlay }) {
 
       <section className="start-howto" aria-labelledby="howto-heading">
         <h2 id="howto-heading">How to play</h2>
+
+        <h3>Solo</h3>
         <ol>
           <li>Pick a category (animals, food, objects, or nature).</li>
           <li>Draw the word with your finger in front of the camera.</li>
           <li>The AI guesses your drawing. A correct guess is worth 1 point.</li>
           <li>Play 5 rounds, then see your score.</li>
+        </ol>
+
+        <h3>Multiplayer</h3>
+        <ol>
+          <li>One player taps Multiplayer, enters a name, and creates a room.</li>
+          <li>Share the 4-letter room code. Friends join from their own device (everyone needs a camera).</li>
+          <li>The host starts the game. Everyone gets the same word and timer at the same time.</li>
+          <li>Everyone draws at once. The AI scores each drawing out of 10 for how well it matches the word.</li>
+          <li>Points add up over 3 rounds, and the player with the most points tops the leaderboard.</li>
         </ol>
       </section>
 
@@ -64,9 +75,16 @@ export default function Start({ onPlay }) {
         <HandDemo />
       </section>
 
-      <button type="button" className="start-play" onClick={onPlay}>
-        Play
-      </button>
+      <div className="start-mode-buttons">
+        <button type="button" className="start-play" onClick={onPlay}>
+          Solo
+        </button>
+        {onMultiplayer && (
+          <button type="button" className="start-play" onClick={onMultiplayer}>
+            Multiplayer
+          </button>
+        )}
+      </div>
     </main>
   )
 }

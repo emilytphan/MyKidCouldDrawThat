@@ -131,3 +131,20 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* Solo / Multiplayer buttons */
+.start-mode-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.start-mode-buttons .start-play {
+  flex: 1;
+  margin-top: 8px;
+}
+
+@media (max-width: 420px) {
+  .start-mode-buttons {
+    flex-direction: column;
+  }
+}
