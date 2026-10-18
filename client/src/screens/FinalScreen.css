@@ -6,53 +6,74 @@
   text-align: center;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
 }
 
 .final-kicker {
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 13px;
+  font-family: var(--heading);
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--accent);
+  background: var(--blue);
+  color: var(--cocoa);
+  padding: 6px 18px;
+  border: 3px solid var(--cocoa);
+  border-radius: 999px;
+  transform: rotate(2deg);
 }
 
 .final-score {
   font-size: 40px;
   line-height: 1.1;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.5px;
   margin: 0;
-  color: var(--text-h);
+  padding: 18px 28px;
+  color: var(--cocoa);
+  background: var(--sage);
+  border: 3px solid var(--cocoa);
+  border-radius: 20px;
+  box-shadow: 0 5px 0 var(--cocoa);
 }
 
 .final-leaderboard {
+  box-sizing: border-box;
+  width: 100%;
   min-height: 180px;
-  border-radius: 12px;
-  border: 2px dashed var(--accent-border);
-  background: var(--social-bg);
-  color: var(--text);
+  border-radius: 20px;
+  border: 3px dashed var(--cocoa);
+  background: var(--sand);
+  color: var(--cocoa);
   display: grid;
   place-items: center;
 }
 
 .final-play-again {
-  font: inherit;
+  font-family: var(--heading);
+  font-size: 1.2rem;
   font-weight: 600;
   margin-top: 8px;
-  padding: 14px 20px;
-  border-radius: 8px;
+  padding: 14px 40px;
+  border-radius: 16px;
   cursor: pointer;
-  color: #fff;
-  background: var(--accent);
-  border: none;
+  color: var(--cocoa);
+  background: var(--caramel);
+  border: 3px solid var(--cocoa);
+  box-shadow: 0 5px 0 var(--cocoa);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .final-play-again:hover {
-  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--cocoa);
+}
+
+.final-play-again:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--cocoa);
 }
 
 .final-play-again:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 3px solid var(--cocoa);
+  outline-offset: 3px;
 }

@@ -1,34 +1,46 @@
 .category-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
 }
 
 .category-button {
-  font: inherit;
+  font-family: var(--heading);
+  font-size: 1.4rem;
   font-weight: 600;
   padding: 28px 16px;
-  border-radius: 12px;
+  border-radius: 20px;
   cursor: pointer;
-  color: var(--text-h);
-  background: var(--accent-bg);
-  border: 2px solid var(--accent-border);
+  color: var(--cocoa);
+  background: var(--sand);
+  border: 3px solid var(--cocoa);
+  box-shadow: 0 5px 0 var(--cocoa);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
+.category-button:nth-child(1) { background: var(--coral); }
+.category-button:nth-child(2) { background: var(--caramel); }
+.category-button:nth-child(3) { background: var(--blue); }
+.category-button:nth-child(4) { background: var(--sage); }
+
 .category-button:hover {
-  box-shadow: var(--shadow);
+  transform: translateY(-3px) rotate(-1deg);
+  box-shadow: 0 8px 0 var(--cocoa);
+}
+
+.category-button:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--cocoa);
 }
 
 .category-button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 3px solid var(--cocoa);
+  outline-offset: 3px;
 }
 
 .category-button-mix {
   grid-column: 1 / -1;
-  background: var(--accent);
-  color: #fff;
-  border-color: transparent;
+  background: var(--sand);
 }
 
 @media (max-width: 520px) {

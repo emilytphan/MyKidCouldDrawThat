@@ -105,3 +105,33 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+:root {
+  --cream: #F7F1E5;
+  --sand: #E6D5B8;
+  --caramel: #C98F65;
+  --sage: #A8B99A;
+  --coral: #E9B9AE;
+  --blue: #AFCBE0;
+  --cocoa: #4B4037;
+
+  --text: #4B4037;
+  --text-h: #4B4037;
+  --bg: #F7F1E5;
+  --border: #4B4037;
+  --accent: #A8693F;
+  --accent-bg: rgba(201, 143, 101, 0.2);
+  --accent-border: #C98F65;
+  --social-bg: #E6D5B8;
+  --heading: 'Fredoka', 'Nunito', system-ui, sans-serif;
+  --sans: 'Nunito', system-ui, sans-serif;
+
+  color-scheme: light;
+  color: var(--text);
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+}
