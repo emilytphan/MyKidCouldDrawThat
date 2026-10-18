@@ -76,4 +76,7 @@ app.post("/api/guess", async (req, res) => {
   }
 });
 
-app.listen(3001, () => console.log("Server on 3001"));
+   const http = require("http");
+   const server = http.createServer(app);
+   require("./multiplayer").attach(server);
+   server.listen(3001, () => console.log("Server on 3001"));

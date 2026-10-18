@@ -7,9 +7,15 @@ const rooms = new Map();
 
 const pickWord = () => WORDS[Math.floor(Math.random() * WORDS.length)];
 
-// STUB: replace with a call to Lenny's /api/guess when it returns { score, guesses, comment }
+// Calls Lenny's /api/guess, which returns { guesses, comment, correct, accuracy }
 async function scoreDrawing(image, word) {
-  return { score: Math.floor(Math.random() * 11), guesses: ["(stub)"], comment: "" };
+  const res = await fetch("http://localhost:3001/api/guess", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imageBase64: image, targetWord: word }),
+  });
+  if (!res.ok) throw new Error("guess failed");
+  return res.json();
 }
 
 function makeCode() {
@@ -58,7 +64,7 @@ function attach(httpServer) {
         if (!d) return { id, name: p.name, accuracy: 0, points: 0, guess: "(no drawing)" };
         try {
           const r = await scoreDrawing(d.image, room.word);
-          const accuracy = Math.max(0, Math.min(10, Number(r.score) || 0));
+          const accuracy = Math.max(0, Math.min(10, Number(r.accuracy) || 0));
           const points = accuracy * 10;
           p.score += points;
           return { id, name: p.name, accuracy, points, guess: r.guesses?.[0] || "?", comment: r.comment };
