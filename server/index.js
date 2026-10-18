@@ -1,11 +1,15 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const sharp = require("sharp");
 const { GoogleGenAI } = require("@google/genai");
+const connectDB = require("./db");
+connectDB();
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "20mb" }));
+app.use("/api", require("./routes/game"));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -16,13 +20,21 @@ app.post("/api/guess", async (req, res) => {
   const { imageBase64, targetWord } = req.body;
   if (!imageBase64) return res.status(400).json({ error: "No image" });
 
-  const data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-
   try {
+    // Strip a "data:image/...;base64," prefix if present
+    const raw = imageBase64.replace(/^data:image\/[\w+.-]+;base64,/, "");
+
+    // Convert any image format to a PNG on a white background
+    const png = await sharp(Buffer.from(raw, "base64"))
+      .flatten({ background: "#ffffff" })
+      .resize({ width: 1024, height: 1024, fit: "inside", withoutEnlargement: true })
+      .png()
+      .toBuffer();
+
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: [
-        { inlineData: { mimeType: "image/png", data } },
+        { inlineData: { mimeType: "image/png", data: png.toString("base64") } },
         {
           text:
             "This is a hand-drawn sketch from a drawing game. What is it? " +
@@ -44,7 +56,11 @@ app.post("/api/guess", async (req, res) => {
     res.json({ guesses, comment: parsed.comment, correct });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Guess failed", guesses: [], correct: false });
+    res.status(500).json({
+      error: err.message || "Guess failed",
+      guesses: [],
+      correct: false,
+    });
   }
 });
 
