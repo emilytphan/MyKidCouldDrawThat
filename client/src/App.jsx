@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { pickWords } from './data/words.js'
 import Start from './screens/Start.jsx'
 import Category from './screens/Category.jsx'
 import DrawScreen from './screens/DrawScreen.jsx'
 import ResultScreen from './screens/ResultScreen.jsx'
 import FinalScreen from './screens/FinalScreen.jsx'
+import Lobby from './screens/Lobby.jsx'
+import MultiplayerDraw from './screens/MultiplayerDraw.jsx'
+import MultiplayerResults from './screens/MultiplayerResults.jsx'
+import { socket } from './socket'
 import './screens/Start.css'
 
 const TOTAL_ROUNDS = 5
@@ -89,7 +93,40 @@ function App() {
   const [score, setScore] = useState(0)
   const [result, setResult] = useState(null)
 
+  // multiplayer state
+  const [mpRound, setMpRound] = useState(null)
+  const [mpResults, setMpResults] = useState(null)
+  const [mpFinal, setMpFinal] = useState(null)
+
   const currentWord = roundWords[round - 1]?.text
+
+  const handleMpRoundStart = useCallback((data) => {
+    setMpRound(data)
+    setMpResults(null)
+    setScreen('mp-draw')
+  }, [])
+
+  const handleMpResults = useCallback((data) => {
+    setMpResults(data)
+    setScreen('mp-results')
+  }, [])
+
+  // multiplayer events that can arrive on any multiplayer screen
+  useEffect(() => {
+    function onRoundStart(data) {
+      handleMpRoundStart(data)
+    }
+    function onGameOver(data) {
+      setMpFinal(data)
+      setScreen('mp-final')
+    }
+    socket.on('round_start', onRoundStart)
+    socket.on('game_over', onGameOver)
+    return () => {
+      socket.off('round_start', onRoundStart)
+      socket.off('game_over', onGameOver)
+    }
+  }, [handleMpRoundStart])
 
   function resetGame() {
     setScreen('start')
@@ -98,6 +135,13 @@ function App() {
     setRound(1)
     setScore(0)
     setResult(null)
+  }
+
+  function exitMultiplayer() {
+    setMpRound(null)
+    setMpResults(null)
+    setMpFinal(null)
+    setScreen('start')
   }
 
   async function handleSelectCategory(nextCategory) {
@@ -141,7 +185,39 @@ function App() {
   }
 
   if (screen === 'start') {
-    return <Start onPlay={() => setScreen('category')} />
+    return (
+      <Start
+        onPlay={() => setScreen('category')}
+        onMultiplayer={() => setScreen('lobby')}
+      />
+    )
+  }
+
+  if (screen === 'lobby') {
+    return (
+      <Lobby
+        onBack={() => setScreen('start')}
+        onRoundStart={handleMpRoundStart}
+      />
+    )
+  }
+
+  if (screen === 'mp-draw' && mpRound) {
+    return (
+      <MultiplayerDraw
+        key={mpRound.round}
+        roundInfo={mpRound}
+        onResults={handleMpResults}
+      />
+    )
+  }
+
+  if (screen === 'mp-results' && mpResults) {
+    return <MultiplayerResults data={mpResults} />
+  }
+
+  if (screen === 'mp-final' && mpFinal) {
+    return <MultiplayerResults final={mpFinal} onExit={exitMultiplayer} />
   }
 
   if (screen === 'category') {
