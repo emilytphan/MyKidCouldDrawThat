@@ -1,7 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useHandTracking } from "./hooks/useHandTracking";
 
-const COLORS = [  "#e63946", // red
+const COLORS = [
+  "#e63946", // red
   "#f77f00", // orange
   "#ffd60a", // yellow
   "#38b000", // green
@@ -13,20 +14,27 @@ const COLORS = [  "#e63946", // red
   "#ffffff", // white
 ];
 
+const HOVER_MS = 500; // hover this long to pick a color (0 = instant)
+const MIN_ERASER = 28; // eraser never gets smaller than this (fits the sponge)
+
 const HandDemo = forwardRef(function HandDemo(props, ref) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const swatchRefs = useRef([]);
   const lastPoint = useRef(null);
+  const justPicked = useRef(false);
   const [color, setColor] = useState(COLORS[0]);
   const [brushSize, setBrushSize] = useState(6);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [hovered, setHovered] = useState(-1);
 
+  const eraserSize = Math.max(brushSize, MIN_ERASER);
+
   const { gesture, cursor, pinchDistance, handVisible } =
     useHandTracking(videoRef);
 
+  // lets the game screen call getImage() and clear()
   useImperativeHandle(ref, () => ({
     getImage() {
       const src = canvasRef.current;
@@ -53,18 +61,18 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
     }
   }, [gesture, pinchDistance]);
 
-  // palette: open on palm, hover with fingertip, peace sign picks + closes
+  // palette: open on palm, track which swatch the fingertip is over
   useEffect(() => {
+    if (gesture !== "palette") justPicked.current = false;
     if (!handVisible) return;
-    const open = paletteOpen || gesture === "palette";
-    if (!open) return;
-    if (gesture === "palette") setPaletteOpen(true);
 
-    // which swatch is under the fingertip?
+    if (gesture === "palette" && !justPicked.current) setPaletteOpen(true);
+    if (!paletteOpen && gesture !== "palette") return;
+
     const wrap = wrapperRef.current.getBoundingClientRect();
     const px = wrap.left + cursor.x * wrap.width;
     const py = wrap.top + cursor.y * wrap.height;
-    const pad = 8; // forgiving hit area
+    const pad = 8;
     const index = swatchRefs.current.findIndex((el) => {
       if (!el) return false;
       const r = el.getBoundingClientRect();
@@ -75,15 +83,24 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
     });
     setHovered(index);
 
-    if (paletteOpen && gesture === "idle") {
-      if (index >= 0) setColor(COLORS[index]);
-      setPaletteOpen(false);
-      setHovered(-1);
-    } else if (paletteOpen && (gesture === "draw" || gesture === "erase")) {
+    // pointing, fist, or peace sign closes it without picking
+    if (paletteOpen && (gesture === "draw" || gesture === "erase" || gesture === "idle")) {
       setPaletteOpen(false);
       setHovered(-1);
     }
   }, [cursor, gesture, handVisible, paletteOpen]);
+
+  // pick the color after hovering on one swatch for HOVER_MS
+  useEffect(() => {
+    if (!paletteOpen || hovered < 0) return;
+    const id = setTimeout(() => {
+      setColor(COLORS[hovered]);
+      justPicked.current = true; // don't reopen while palm is still up
+      setPaletteOpen(false);
+      setHovered(-1);
+    }, HOVER_MS);
+    return () => clearTimeout(id);
+  }, [hovered, paletteOpen]);
 
   // draw / erase
   useEffect(() => {
@@ -105,12 +122,12 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
       }
       lastPoint.current = { x, y };
     } else if (handVisible && gesture === "erase") {
-      ctx.clearRect(x - brushSize * 2, y - brushSize * 2, brushSize * 4, brushSize * 4);
+      ctx.clearRect(x - eraserSize / 2, y - eraserSize / 2, eraserSize, eraserSize);
       lastPoint.current = null;
     } else {
-      lastPoint.current = null;
+      lastPoint.current = null; // lift the pen
     }
-  }, [cursor, gesture, handVisible, color, brushSize]);
+  }, [cursor, gesture, handVisible, color, brushSize, eraserSize]);
 
   function clearCanvas() {
     const c = canvasRef.current;
@@ -121,11 +138,21 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
     <div>
       <div
         ref={wrapperRef}
-        style={{ position: "relative", width: 640, maxWidth: "100%", background: "white" }}
+        style={{
+          position: "relative",
+          width: 640,
+          maxWidth: "100%",
+          background: "white",
+        }}
       >
         <video
           ref={videoRef}
-          style={{ width: "100%", transform: "scaleX(-1)", display: "block", opacity: 0.4 }}
+          style={{
+            width: "100%",
+            transform: "scaleX(-1)",
+            display: "block",
+            opacity: 0.4,
+          }}
         />
         <canvas
           ref={canvasRef}
@@ -138,13 +165,13 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
         <div
           style={{
             position: "absolute",
-            right: 16,
-            bottom: 60,
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            padding: 10,
-            borderRadius: 14,
+            right: 12,
+            bottom: 12,
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 28px)",
+            gap: 8,
+            padding: 8,
+            borderRadius: 12,
             background: "rgba(30,30,40,0.85)",
             opacity: paletteOpen ? 1 : 0,
             pointerEvents: paletteOpen ? "auto" : "none",
@@ -155,13 +182,21 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
             <div
               key={c}
               ref={(el) => (swatchRefs.current[i] = el)}
-              onClick={() => { setColor(c); setPaletteOpen(false); }}
+              onClick={() => {
+                setColor(c);
+                setPaletteOpen(false);
+              }}
               style={{
                 width: 28,
-                height: 26,
+                height: 28,
                 borderRadius: "50%",
                 background: c,
-                border: hovered === i ? "4px solid white" : c === color ? "3px solid #aaa" : "2px solid #555",
+                border:
+                  hovered === i
+                    ? "3px solid white"
+                    : c === color
+                    ? "2px solid #aaa"
+                    : "1px solid #555",
                 transform: hovered === i ? "scale(1.25)" : "scale(1)",
                 transition: "transform 0.1s",
               }}
@@ -169,22 +204,69 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
           ))}
         </div>
 
+        {/* cursor: pencil when drawing, eraser when erasing */}
         {handVisible && (
           <div
             style={{
               position: "absolute",
               left: `${cursor.x * 100}%`,
               top: `${cursor.y * 100}%`,
-              width: brushSize,
-              height: brushSize,
-              marginLeft: -brushSize / 2,
-              marginTop: -brushSize / 2,
-              borderRadius: "50%",
-              background: color,
-              border: "2px solid white",
+              width: 0,
+              height: 0,
               pointerEvents: "none",
             }}
-          />
+          >
+            {gesture === "erase" ? (
+              <div
+                style={{
+                  position: "absolute",
+                  width: eraserSize,
+                  height: eraserSize,
+                  transform: "translate(-50%, -50%)",
+                  border: "2px solid #555",
+                  borderRadius: 2,
+                  background: "rgba(255,255,255,0.6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: Math.max(14, eraserSize * 0.6),
+                  lineHeight: 1,
+                  overflow: "hidden",
+                }}
+              >
+                🧽
+              </div>
+            ) : (
+              <>
+                {/* brush dot, shows color and size */}
+                <div
+                  style={{
+                    position: "absolute",
+                    width: brushSize,
+                    height: brushSize,
+                    transform: "translate(-50%, -50%)",
+                    borderRadius: "50%",
+                    background: color,
+                    border: "2px solid white",
+                  }}
+                />
+                {/* pencil, tip at the dot */}
+                {gesture === "draw" && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      bottom: 0,
+                      fontSize: 28,
+                      lineHeight: 1,
+                    }}
+                  >
+                    ✏️
+                  </span>
+                )}
+              </>
+            )}
+          </div>
         )}
       </div>
 
