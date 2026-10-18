@@ -165,8 +165,8 @@ const HandDemo = forwardRef(function HandDemo(props, ref) {
         <div
           style={{
             position: "absolute",
-            right: 12,
-            bottom: 12,
+            right: 65,
+            bottom: 30,
             display: "grid",
             gridTemplateColumns: "repeat(2, 28px)",
             gap: 8,
