@@ -16,6 +16,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const normalize = (s) =>
   s.toLowerCase().trim().replace(/[^a-z\s]/g, "").replace(/s$/, "");
 
+function floorAccuracy(value) {
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(10, Math.max(0, n));
+}
+
 app.post("/api/guess", async (req, res) => {
   const { imageBase64, targetWord } = req.body;
   if (!imageBase64) return res.status(400).json({ error: "No image" });
@@ -37,10 +43,14 @@ app.post("/api/guess", async (req, res) => {
         { inlineData: { mimeType: "image/png", data: png.toString("base64") } },
         {
           text:
-            "This is a hand-drawn sketch from a drawing game. What is it? " +
+            "This is a hand-drawn sketch from a drawing game. " +
+            (targetWord
+              ? `The secret word is "${targetWord}". Grade how clearly the sketch depicts that word. `
+              : "What is it? Grade how recognizable the sketch is. ") +
             "Reply with JSON only, no other text: " +
-            '{"guesses": ["...", "...", "..."], "comment": "one short funny remark"}. ' +
-            "Guesses are single common nouns, ranked by confidence.",
+            '{"guesses": ["...", "...", "..."], "accuracy": 0, "comment": "one short funny remark"}. ' +
+            "Guesses are single common nouns, ranked by confidence. " +
+            "accuracy is a number from 0 (unrecognizable) to 10 (clear). Decimals are allowed; the server will round down.",
         },
       ],
       config: { responseMimeType: "application/json" },
@@ -49,17 +59,19 @@ app.post("/api/guess", async (req, res) => {
     const text = response.text || "";
     const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
     const guesses = parsed.guesses || [];
+    const accuracy = floorAccuracy(parsed.accuracy);
     const correct = targetWord
       ? guesses.some((g) => normalize(g) === normalize(targetWord))
       : false;
 
-    res.json({ guesses, comment: parsed.comment, correct });
+    res.json({ guesses, comment: parsed.comment, correct, accuracy });
   } catch (err) {
     console.error(err);
     res.status(500).json({
       error: err.message || "Guess failed",
       guesses: [],
       correct: false,
+      accuracy: 0,
     });
   }
 });
